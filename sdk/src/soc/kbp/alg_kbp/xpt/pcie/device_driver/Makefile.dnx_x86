@@ -1,0 +1,57 @@
+#
+#  Copyright 2015-2019 Broadcom. All rights reserved.
+#  The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+#  
+#  This program is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License, version 2, as
+#  published by the Free Software Foundation (the "GPL").
+#  
+#  This program is distributed in the hope that it will be useful, but
+#  WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+#  General Public License version 2 (GPLv2) for more details.
+#  
+#  You should have received a copy of the GNU General Public License version 2 (GPLv2)
+#  along with this program; if not, write to the Free Software
+#  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+#
+
+obj-m := kbp_driver.o
+ARCH := x86_64
+ccflags-y := -MD -MF -DUSE_LINUX_BDE_MMAP=1 -Wno-error=unused-value -Wno-error=unused-but-set-variable -Wno-error=cpp -Wno-error=aggressive-loop-optimizations -Wno-error=array-bounds\
+	-lc -nostdinc -isystem  -D__KERNEL__ -DNDEBUG -Wundef -Wno-error=unused-value -Wno-error=cpp -Wstrict-prototypes -Wno-trigraphs -fno-strict-aliasing -fno-common\
+	-Wno-format-security -fno-delete-null-pointer-checks -O2 -m64 -mtune=generic -mno-red-zone -mcmodel=kernel -funit-at-a-time -maccumulate-outgoing-args -DCONFIG_AS_CFI=1\
+	-DCONFIG_AS_CFI_SIGNAL_FRAME=1 -pipe -Wno-sign-compare -fno-asynchronous-unwind-tables -Wf ame-larger-than=1024 -fno-omit-frame-pointer -Wdeclaration-after-statement\
+	-Wno-pointer-sign -fno-strict-overflow -fno-dwarf -cfi-asm -fconserve-stack -D__DUNE_LINUX_BCM_CPU_PCIE__ -D_SIMPLE_MEMORY_ALLOCATION_=9 -DUSE_LINUX_BDE_MMAP=1\
+	-DPHYS_ADDRS_ARE_64BITS -DBCM_WARM_BOOT_SUPPORT -DBCM_WARM_BOOT_SUPPORT_SW_DUMP -DBCM_EASY_RELOAD_WB_COMPAT_SUPPORT -DBCM_CONTROL_API_TRACKING -DUSE_VALGRIND_CLIENT_REQUESTS\
+	-DBCM_WARM_BOOT_SUPPORT -DBCM_WARM_BOOT_SUPPORT_SW_DUMP -DBCM_BPROF_STATS -DPTRS_ARE_64BITS -DSAL_SPL_LOCK_ON_IRQ -DSYS_BE_PIO=0 -DSYS_BE_PACKET=0 -DSYS_BE_OTHER=0\
+	-DLE_HOST=1 -DBCM_PLATFORM_STRING=\"X86\" -DSAL_BDE_DMA_MEM_DEFAULT=16 -DNO_FILEIO -DNO_CTRL_C -DNO_MEMTUNE -DLINUX -DINCLUDE_L3  -DINCLUDE_I2C  -DINCLUDE_MEM_SCAN\
+	-DINCLUDE_CHASSIS  -DINCLUDE_TEST  -DINCLUDE_BCM_SAL_PROFILE  -DINCLUDE_RCPU  -DINCLUDE_INTR  -DINCLUDE_PTP  -DINCLUDE_CUSTOMER  -DINCLUDE_MSTP  -DINCLUDE_KBP\
+	-DINCLUDE_ASE_TEST  -DBCM_SAND_SUPPORT  -DBCM_RPC_SUPPORT  -DBCM_PETRA_SUPPORT  -DBCM_RPC_SUPPORT  -DBCM_DFE_SUPPORT -DINCLUDE_LIB_CPUDB -DINCLUDE_LIB_CPUTRANS\
+	-DINCLUDE_LIB_DISCOVER -DINCLUDE_LIB_STKTASK -DDISCOVER_APP_DATA_BOARDID -DINCLUDE_I2C  -DVENDOR_CUSTOMER78  -DVENDOR_BROADCOM  -DVENDOR_DNX  -DINCLUDE_PHY_522X\
+	-DINCLUDE_PHY_54XX  -DINCLUDE_PHY_5464  -DINCLUDE_PHY_5421S  -DINCLUDE PHY_5482  -DINCLUDE_PHY_54616  -DINCLUDE_PHY_54680  -DINCLUDE_PHY_54680E  -DINCLUDE_PHY_52681E\
+	-DINCLUDE_PHY_54880E  -DINCLUDE_PHY_54682  -DINCLUDE_PHY_54684  -DINCLUDE_PHY_54640  -DINCLUDE_PHY_54640E  -DINCLUDE_PHY_54880  -DINCLUDE_PHY_SERDES  -DINCLUDE_PHY_SIMUL\
+	-DINCLUDE_PHY_8703  -DINCLUDE_PHY_8705  -DINCLUDE_PHY_8706  -DINCLUDE_PHY_8072  -DINCLUDE_PHY_8040  -DINCLUDE_PHY_8481  -DINCLUDE_PHY_8750  -DINCLUDE_PHY_8729\
+	-DINCLUDE_PHY_84740  -DINCLUDE_PHY_84756  -DINCLUDE_PHY_54380  -DINCLUDE_PHY_542XX  -DINCLUDE_PHY_84334  -DINCLUDE_PHY_84728  -DINCLUDE_PHY_84749  -DINCLUDE_PHY_84328\
+	-DINCLUDE_PHY_84793  -DINCLUDE_PHY_82328  -DINCLUDE_PHY_82381  -DINCLUDE_PHY_82780  -DINCLUDE_PHY_82764  -DINCLUDE_PHY_EGPHY28  -DINCLUDE_PHY_82864  -DINCLUDE_PHY_82109\
+	-DINCLUDE_LONGREACH -DNO_BCM_88732_A0   -Wall   -DLINUX_SAL_DMA_ALLOC_OVERRIDE -DDUNE_BCM -DLINK_PETRA_LIBRARIES -DLINK_PPD_LIBRARIES -DBCM_JERICHO_SUPPORT\
+	-DBCM_JERICHO_SUPPORT -DBCM_JERICHO_PLUS_SUPPORT -DBCM_QAX_SUPPORT -DBCM_QUX_SUPPORT -DBCM_FLAIR_SUPPORT -DDUNE_BCM -DNLMPLATFORM_UNIX -DNLMPLATFORM_LINUX -DNLM_BUILD64\
+	-DPHYMOD_SUPPORT -DPHYMOD_TIER1_SUPPORT -DPHYMOD_INCLUDE_CUSTOM_CONFIG -DPHYMOD_DIAG -DPORTMOD_DIAG -DPORTMOD_SUPPORT
+KERNELDIR := /projects/ntsw-tools/linux/fedora-21-x86_64/linux-3.14.0-1.nfsv2.fc21.x86_64
+export CROSS_COMPILE := x86_64-fedora-linux-gnu-
+export CC := /projects/ntsw-tools/toolchains/x86_64/fedora-21/bin/x86_64-fedora-linux-gnu-gcc
+export LD := /projects/ntsw-tools/toolchains/x86_64/fedora-21/bin/x86_64-fedora-linux-gnu-ld
+
+##     useful option for building modules:
+##     make KBUILD_VERBOSE=1
+##     make V=1
+
+PWD := $(shell pwd)
+
+default:
+	$(MAKE) -C $(KERNELDIR) M=$(PWD) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) CC=$(CC) LD=$(LD) modules
+
+clean:
+	$(MAKE) -C $(KERNELDIR) M=$(PWD) clean
+	rm -rf *.o *.ko *.mod.c *.mod.o .*.cmd .tmp_versions Module.symvers *~
+
