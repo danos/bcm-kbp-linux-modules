@@ -1,0 +1,7 @@
+Package: bcm-kbp-linux-modules-_KVERS_
+Section: kernel
+Architecture: any
+Provides: bcm-kbp-linux-modules
+Depends: ${misc:Depends}, @KVERS_DEPEND@
+Description: Kernel module for BCM KBP
+ Provides BCM KBP kernel module.

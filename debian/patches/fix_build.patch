@@ -1,0 +1,21 @@
+--- a/sdk/src/soc/kbp/alg_kbp/xpt/pcie/device_driver/Makefile
++++ b/sdk/src/soc/kbp/alg_kbp/xpt/pcie/device_driver/Makefile
+@@ -18,7 +18,7 @@
+ 
+ obj-m := kbp_driver.o
+ 
+-KERNELDIR := /lib/modules/$(shell uname -r)/build
++KERNELDIR ?= /lib/modules/$(shell uname -r)/build
+ 
+ ##     useful option for building modules:
+ ##     make KBUILD_VERBOSE=1
+@@ -29,6 +29,9 @@
+ default:
+ 	$(MAKE) -C $(KERNELDIR) M=$(PWD) modules
+ 
++install:
++	$(MAKE) -C $(KERNELDIR) M=$(PWD) modules_install
++
+ clean:
+ 	$(MAKE) -C $(KERNELDIR) M=$(PWD) clean
+ 	rm -rf *.o *.ko *.mod.c *.mod.o .*.cmd .tmp_versions Module.symvers *~

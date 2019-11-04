@@ -1,0 +1,11 @@
+--- a/sdk/src/soc/kbp/alg_kbp/xpt/pcie/device_driver/kbp_driver.c
++++ b/sdk/src/soc/kbp/alg_kbp/xpt/pcie/device_driver/kbp_driver.c
+@@ -1680,7 +1680,7 @@ static int kbp_initialize_dma(struct kbp
+ module_init(kbp_drv_module_init);
+ module_exit(kbp_drv_module_exit);
+ 
+-MODULE_LICENSE("Proprietary");
++MODULE_LICENSE("GPL");
+ MODULE_AUTHOR("Broadcom Limited");
+ MODULE_DESCRIPTION("Driver for KBP device");
+ 

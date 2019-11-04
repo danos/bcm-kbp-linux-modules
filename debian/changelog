@@ -1,0 +1,5 @@
+bcm-kbp-linux-modules (1.5.10-0vyatta2) unstable; urgency=medium
+
+  * DANOS Import master
+
+ -- Robert Shearman <robert.shearman@att.com>  Fri, 01 Nov 2019 15:21:29 +0000

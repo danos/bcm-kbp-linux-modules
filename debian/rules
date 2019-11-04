@@ -1,0 +1,39 @@
+#!/usr/bin/make -f
+include /usr/share/dpkg/default.mk
+
+ifeq (,$(KVERS))
+KVERS := $(shell LIST=$$(ls /lib/modules/); for dir in $$LIST; do test -d /lib/modules/$$dir/build && echo $$dir; done | sort -V | head -1)
+endif
+KVERS_BINARY := $(shell dpkg-query -W -f='$${Version}\n' linux-headers-$(KVERS))
+KVERS_DEPEND := linux-image-$(KVERS) (= $(KVERS_BINARY)) | linux-image-$(KVERS)-signed (= $(KVERS_BINARY)) | linux-image-$(KVERS)-unsigned (= $(KVERS_BINARY))
+export MODPKG=bcm-kbp-linux-modules-$(KVERS)
+export KERNELDIR=/lib/modules/$(KVERS)/build
+
+debian/control.modules: debian/control.modules.in
+	@if [ x"$(KVERS)" = x ] ; then \
+		echo 'No kernel headers version found' >&2; \
+		exit 1; \
+	fi
+	sed -e "s/_KVERS_/$(KVERS)/" -e "s/@KVERS_DEPEND@/$(KVERS_DEPEND)/"< $< > $@
+	sed -i '/Package: bcm-kbp-linux-modules/d' debian/control
+	sed -i '/Architecture: any/d' debian/control
+	cat $@ >> debian/control
+
+build: debian/control.modules
+	dh $@ --with signobs --sourcedirectory=sdk/src/soc/kbp/alg_kbp/xpt/pcie/device_driver
+
+%:
+	dh $@ --with signobs --sourcedirectory=sdk/src/soc/kbp/alg_kbp/xpt/pcie/device_driver
+
+override_dh_auto_install:
+	dh_auto_install -- INSTALL_MOD_PATH=$(CURDIR)/debian/tmp
+	dh_install -p $(MODPKG) lib/modules
+
+override_dh_clean:
+	dh_clean
+	rm -f debian/control.modules
+	sed -i '/Package: bcm-kbp-linux-modules-/,/`tail -n1 debian/control.modules.in`/d' debian/control
+	if ! grep -qs 'Package: bcm-kbp-linux-modules' debian/control; then \
+		echo 'Package: bcm-kbp-linux-modules' >> debian/control; \
+		echo 'Architecture: any' >> debian/control; \
+	fi
