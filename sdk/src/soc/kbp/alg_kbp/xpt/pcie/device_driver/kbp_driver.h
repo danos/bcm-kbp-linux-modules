@@ -1,20 +1,22 @@
-/*
- * Copyright 2015-2019 Broadcom. All rights reserved.
- * The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License, version 2, as
- * published by the Free Software Foundation (the "GPL").
- * 
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License version 2 (GPLv2) for more details.
- * 
- * You should have received a copy of the GNU General Public License version 2 (GPLv2)
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+/*****************************************************************************************
+*
+* Copyright 2015-2019 Broadcom. All rights reserved.
+* The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License, version 2, as
+* published by the Free Software Foundation (the "GPL").
+*
+* This program is distributed in the hope that it will be useful, but
+* WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+* General Public License version 2 (GPLv2) for more details.
+*
+* You should have received a copy of the GNU General Public License version 2 (GPLv2)
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*
+*****************************************************************************************/
 
 #ifndef __KBP_DRIVER_H
 #define __KBP_DRIVER_H
@@ -61,10 +63,10 @@ struct kbp_sys_cfg
 #define KBP_FPGA_SIGNAL 12
 
 #define KBP_DRIVER_VERSION_MAJOR 2
-#define KBP_DRIVER_VERSION_MINOR 10
+#define KBP_DRIVER_VERSION_MINOR 11
 
 #define KBP_DRIVER_VERSION_MAJOR_STR "2"
-#define KBP_DRIVER_VERSION_MINOR_STR "10"
+#define KBP_DRIVER_VERSION_MINOR_STR "11"
 /**
  * m = memory, c = core, r = register, f = field, d = data.
  */
