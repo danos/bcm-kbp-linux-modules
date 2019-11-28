@@ -1,3 +1,10 @@
+bcm-kbp-linux-modules (1.5.11-0vyatta1) unstable; urgency=medium
+
+  * Import of KBP_SDK_v1511_20191127_JERICHO_X86.tar.bz2
+  * Refresh patches
+
+ -- Robert Shearman <robert.shearman@att.com>  Thu, 28 Nov 2019 16:30:29 +0000
+
 bcm-kbp-linux-modules (1.5.10-0vyatta2) unstable; urgency=medium
 
   * DANOS Import master
