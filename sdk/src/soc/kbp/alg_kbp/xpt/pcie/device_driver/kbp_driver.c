@@ -1,20 +1,22 @@
-/*
- * Copyright 2015-2019 Broadcom. All rights reserved.
- * The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License, version 2, as
- * published by the Free Software Foundation (the "GPL").
- * 
- * This program is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * General Public License version 2 (GPLv2) for more details.
- * 
- * You should have received a copy of the GNU General Public License version 2 (GPLv2)
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
- */
+/*****************************************************************************************
+*
+* Copyright 2015-2019 Broadcom. All rights reserved.
+* The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License, version 2, as
+* published by the Free Software Foundation (the "GPL").
+*
+* This program is distributed in the hope that it will be useful, but
+* WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+* General Public License version 2 (GPLv2) for more details.
+*
+* You should have received a copy of the GNU General Public License version 2 (GPLv2)
+* along with this program; if not, write to the Free Software
+* Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+*
+*****************************************************************************************/
 
 #include <linux/module.h>
 #include <linux/version.h>
@@ -226,10 +228,25 @@ static irqreturn_t pdc_msi_interrupt(int irq, void *kbp_dev)
                  device->owner_pid);
     }
 
-    if (device->type == KBP_DEVICE_PCIE)
+    if (device->type == KBP_DEVICE_PCIE) {
+        int signal_num = (device->signal_num ? device->signal_num : KBP_PCIE_SIGNAL);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 20, 0)
+        struct kernel_siginfo si = {
+            .si_signo = signal_num,
+            .si_code = (SI_KERNEL | 0x1),
+            .si_int = device->id,
+        };
+#else
+        struct siginfo si = {
+            .si_signo = signal_num,
+            .si_code = (SI_KERNEL | 0x1),
+            .si_int = device->id,
+        };
+#endif
+        ret = send_sig_info(signal_num, &si, device->owner_task);
+    } else {
         ret = send_sig(device->signal_num, device->owner_task, 0);
-    else
-        ret = send_sig(device->signal_num, device->owner_task, 0);
+    }
 
     if (ret == 0) {
         KBP_INFO(": Delivered signal to %d\n", device->owner_pid);
@@ -1680,7 +1697,7 @@ static int kbp_initialize_dma(struct kbp_device *device)
 module_init(kbp_drv_module_init);
 module_exit(kbp_drv_module_exit);
 
-MODULE_LICENSE("Proprietary");
+MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Broadcom Limited");
 MODULE_DESCRIPTION("Driver for KBP device");
 
