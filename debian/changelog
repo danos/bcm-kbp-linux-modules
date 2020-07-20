@@ -1,3 +1,9 @@
+bcm-kbp-linux-modules (1.5.13-0vyatta1) UNRELEASED; urgency=medium
+
+  * Import of KBP_SDK_v1513_20200712_JERICHO_X86.tar.bz2
+
+ -- Robert Shearman <robert.shearman@att.com>  Mon, 20 Jul 2020 21:45:12 +0100
+
 bcm-kbp-linux-modules (1.5.11-0vyatta1) unstable; urgency=medium
 
   * Import of KBP_SDK_v1511_20191127_JERICHO_X86.tar.bz2
