@@ -1,6 +1,6 @@
 /*****************************************************************************************
 *
-* Copyright 2015-2019 Broadcom. All rights reserved.
+* Copyright 2015-2020 Broadcom. All rights reserved.
 * The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 *
 * This program is free software; you can redistribute it and/or modify
@@ -203,7 +203,7 @@ static int dma_clear_fifo(struct kbp_device *device);
  * value represent the Buffer size in power of 2.
  * Example: 3 => 2 pow 3 = 8K Entries.
  */
-static int dma_resp_buf_size[] = {0, 0, 3, 0, 6};
+static int dma_resp_buf_size[] = {0, 5, 3, 0, 6};
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 20)
 static irqreturn_t pdc_msi_interrupt(int irq, void *kbp_dev, struct pt_regs *regs)
@@ -1641,12 +1641,12 @@ static int kbp_initialize_dma(struct kbp_device *device)
         switch (device->num_channels) {
             /* Notation => <TX Chl ID>:<Source Type> */
             case 5:
-                /* 0:ReqSrc0, 1:ReqSrc1, 2:Eviction, 3:A-Scan, 4:Non-Scan BLKread */
-                pdc_tx_fifo_size[0] = pdc_tx_fifo_size[1] = 1;
-                pdc_tx_fifo_size[2] = pdc_tx_fifo_size[3] = pdc_tx_fifo_size[4] = 2;
+                /* 0:ReqSrc0, 1:Age-Scan, 2:Eviction, 3:Non-Scan blkread 4:Counter Scan blkread */
+                pdc_tx_fifo_size[0] = pdc_tx_fifo_size[3] = 1;
+                pdc_tx_fifo_size[2] = pdc_tx_fifo_size[1] = pdc_tx_fifo_size[4] = 2;
                 pdc_tx_fifo_start_addr[1] = 64;
-                pdc_tx_fifo_start_addr[2] = 128;
-                pdc_tx_fifo_start_addr[3] = 256;
+                pdc_tx_fifo_start_addr[2] = 192;
+                pdc_tx_fifo_start_addr[3] = 320;
                 pdc_tx_fifo_start_addr[4] = 384;
                 break;
             case 4:
