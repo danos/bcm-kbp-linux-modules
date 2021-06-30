@@ -1,2 +1,3 @@
 fix_build.patch
 use-ioremap-instead-of-ioremap-nocache.patch
+convert-device-proc-fops-to-proc-ops.patch

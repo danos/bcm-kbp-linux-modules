@@ -1,0 +1,30 @@
+--- a/sdk/src/soc/kbp/alg_kbp/xpt/pcie/device_driver/kbp_driver.c
++++ b/sdk/src/soc/kbp/alg_kbp/xpt/pcie/device_driver/kbp_driver.c
+@@ -1149,6 +1149,19 @@ static int kbp_device_close(struct inode
+ 
+ 
+ /* /proc/kbp/ * file operations */
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(5,6,0)
++static const struct proc_ops device_proc_fops = {
++    .proc_open = kbp_device_open,
++    .proc_read = seq_read,
++    .proc_lseek = seq_lseek,
++    .proc_release = kbp_device_close,
++    .proc_ioctl = kbp_device_ioctl,
++#ifdef CONFIG_COMPAT
++    .proc_compat_ioctl = kbp_device_compat_ioctl,
++#endif
++    .proc_mmap = kbp_device_mmap
++};
++#else
+ static const struct file_operations device_proc_fops = {
+     .owner = THIS_MODULE,
+     .open = kbp_device_open,
+@@ -1161,6 +1174,7 @@ static const struct file_operations devi
+ #endif
+     .mmap = kbp_device_mmap
+ };
++#endif
+ 
+ #if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 20)
+ struct proc_dir_entry *proc_create_data(const char *name, umode_t mode, struct proc_dir_entry *parent,
