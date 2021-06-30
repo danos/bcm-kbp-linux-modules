@@ -1,0 +1,11 @@
+--- a/sdk/src/soc/kbp/alg_kbp/xpt/pcie/device_driver/kbp_driver.c
++++ b/sdk/src/soc/kbp/alg_kbp/xpt/pcie/device_driver/kbp_driver.c
+@@ -405,7 +405,7 @@ static struct kbp_device *kbp_alloc_devi
+         tmp->next->prev = tmp;
+     device_list_root = tmp;
+ 
+-    tmp->regmap_virt = (uint8_t*) ioremap_nocache(regmap_base, regmap_size);
++    tmp->regmap_virt = (uint8_t*) ioremap(regmap_base, regmap_size);
+     return tmp;
+ }
+ 

@@ -1,1 +1,2 @@
 fix_build.patch
+use-ioremap-instead-of-ioremap-nocache.patch
