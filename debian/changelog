@@ -1,3 +1,10 @@
+bcm-kbp-linux-modules (1.5.13-0vyatta2) unstable; urgency=medium
+
+  * Use ioremap instead of ioremap_noncache (Bugfix: VRVDR-55062)
+  * Convert device_proc_fops to a struct proc_ops (Bugfix: VRVDR-55062)
+
+ -- Charles (Chas) Williams <ciwillia@vyatta.att-mail.com>  Wed, 14 Jul 2021 15:03:12 -0400
+
 bcm-kbp-linux-modules (1.5.13-0vyatta1) unstable; urgency=medium
 
   * Import of KBP_SDK_v1513_20200712_JERICHO_X86.tar.bz2
