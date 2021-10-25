@@ -1,3 +1,9 @@
+bcm-kbp-linux-modules (1.5.15.1-0vyatta1) unstable; urgency=medium
+
+  * Import of KBP_SDK_v15151_20210630_JERICHO_X86.tar.bz2
+
+ -- Charles (Chas) Williams <ciwillia@vyatta.att-mail.com>  Mon, 25 Oct 2021 15:54:36 -0400
+
 bcm-kbp-linux-modules (1.5.13-0vyatta2) unstable; urgency=medium
 
   * Use ioremap instead of ioremap_noncache (Bugfix: VRVDR-55062)
