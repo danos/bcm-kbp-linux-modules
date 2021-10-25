@@ -1,6 +1,6 @@
 /*****************************************************************************************
 *
-* Copyright 2015-2020 Broadcom. All rights reserved.
+* Copyright 2015-2021 Broadcom. All rights reserved.
 * The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 *
 * This program is free software; you can redistribute it and/or modify
@@ -164,7 +164,7 @@ static struct proc_dir_entry *kbp_proc_root;
  * To create unique entries
  */
 
-static int32_t next_pcie_id = -1;
+static int32_t next_pcie_id = 0;
 static int32_t next_fpga_id = 0;
 
 /*
@@ -196,6 +196,7 @@ static int pram_enable_disable(struct kbp_device *dev, unsigned int enable);
 /* Enable bmp: bit 0 to enable/disable loopback, bit[3:1] is channel ID */
 static int loopback_enable_disable(struct kbp_device *dev, unsigned int enable_bmp);
 static int dma_clear_fifo(struct kbp_device *device);
+static void remove_pci_devices(void);
 
 /*
  * DMA response buffer size for each channel in 1K entries. one entry is 64b Word
@@ -203,7 +204,16 @@ static int dma_clear_fifo(struct kbp_device *device);
  * value represent the Buffer size in power of 2.
  * Example: 3 => 2 pow 3 = 8K Entries.
  */
-static int dma_resp_buf_size[] = {0, 5, 3, 0, 6};
+
+/* 
+ * Default DMA channels assigned for different operations 
+ * CP_TRAFFIC                   (0)
+ * AGE_SCAN                     (1)
+ * COUNTER_EVICTION             (2)
+ * NON_SCAN_BULK_READ           (3)
+ * COUNTER_BULK_READ            (4)
+*/
+static int dma_resp_buf_size[] = {0, 5, 3, 0, 7};
 
 #if LINUX_VERSION_CODE < KERNEL_VERSION(2, 6, 20)
 static irqreturn_t pdc_msi_interrupt(int irq, void *kbp_dev, struct pt_regs *regs)
@@ -276,6 +286,7 @@ static int parse_pcie_mapping(char *pci_bus_mapping)
 
     while ((next_tok = strsep(&mapping, "|")) != NULL) {
         int i, found, len;
+        int cnotation, dnotation, j;
 
         if (!*next_tok)
             continue;
@@ -292,6 +303,26 @@ static int parse_pcie_mapping(char *pci_bus_mapping)
                     return -ENOMEM;
                 strncpy(pci_map->bus_name, next_tok, i);
                 pci_map->bus_name[i] = '\0';
+
+                /*
+                 * Verify the bus name format is valid or not
+                 * A valid bus name format is <domain>:<bus>:<slot>.<func>
+                 */
+                cnotation = 0;
+                dnotation = 0;
+                for (j = 0; j < i; j++) {
+                    if (pci_map->bus_name[j] == ':') {
+                        cnotation++;
+                    } else if (pci_map->bus_name[j] == '.') {
+                        dnotation++;
+                    }
+                }
+
+                if (cnotation != 2 || dnotation != 1) {
+                    KBP_INFO(": Incorrect PCI bus name format: %s\n", next_tok);
+                    return -EFAULT;
+                }
+
 #if (LINUX_VERSION_CODE < KERNEL_VERSION(3, 18, 0))
                 err = strict_strtol(&next_tok[i + 1], 10, &id);
 #else
@@ -313,7 +344,7 @@ static int parse_pcie_mapping(char *pci_bus_mapping)
             }
         }
         if (!found) {
-            KBP_INFO(": Error parsing string %s\n", next_tok);
+            KBP_INFO(": Invalid pcie_bus_mapping input: %s\n", next_tok);
             return -EFAULT;
         }
     }
@@ -324,28 +355,31 @@ static int parse_pcie_mapping(char *pci_bus_mapping)
 
 static int32_t get_pcie_id(struct pci_dev *kbp_dev)
 {
-    int32_t id;
+    int32_t id, found = 0;
     struct kbp_enumeration_id *t;
 
-    if (next_pcie_id == -1) {
-        /* First time setup */
-        int32_t largest_id = 0;
-
+    /* If PCIe device bus name is not found in input bus mapping array return -1 otherwise
+     * return corresponding PCIe ID.
+     */
+    if (pcie_bus_mapping) {
         for (t = enumeration_ids; t; t = t->next) {
-            if (t->id >= largest_id)
-                largest_id = t->id + 1;
+            if (strcmp(t->bus_name, pci_name(kbp_dev)) == 0) {
+                found = 1;
+                id = t->id;
+                break;
+            }
         }
-
-        next_pcie_id = largest_id;
+    /* By default allocate PCIe dev id incrementally 0,1,2 ... */
+    } else {
+        found = 1;
+        id = next_pcie_id;
+        next_pcie_id++;
     }
 
-    for (t = enumeration_ids; t; t = t->next) {
-        if (strcmp(t->bus_name, pci_name(kbp_dev)) == 0)
-            return t->id;
+    if (!found) {
+        return -1;
     }
 
-    id = next_pcie_id;
-    next_pcie_id++;
     return id;
 }
 
@@ -382,13 +416,22 @@ static struct kbp_device *kbp_alloc_device_handle(struct pci_dev *kbp_dev,
         uint32_t id;
 
         tmp = kmalloc(sizeof(*tmp), GFP_KERNEL);
-        if (!tmp)
+        if (!tmp) {
+            KBP_INFO(": kmalloc failed.\n");
             return NULL;
+        }
         if (type == KBP_DEVICE_FPGA) {
             id = next_fpga_id;
             next_fpga_id++;
         } else {
             id = get_pcie_id(kbp_dev);
+            if (id == -1) {
+                /* if id is -1, return NULL device becuase return type
+                 * of this function is device handle
+                 */
+                KBP_INFO(": PCIe device: %s not found in pcie_bus_mapping input.\n", pci_name(kbp_dev));
+                return NULL;
+            }
         }
         memset(tmp, 0, sizeof(*tmp));
         tmp->id = id;
@@ -460,15 +503,16 @@ static int kbp_pci_probe(struct pci_dev *kbp_dev, const struct pci_device_id *kb
     /* enable bus mastering */
     pci_set_master(kbp_dev);
     device = kbp_alloc_device_handle(kbp_dev, type);
-    if (!device)
+    if (!device) {
         return -ENOMEM;
+    }
 
     /* To identify the device type
      * 1: OP, 2: OP2
      */
     KBP_READ_PCIE_REG(device, opb_pdc_registers_DEV_ID, regval);
     if (regval == 0x69A || regval == 0x69B
-        || regval == 0x68C || regval == 0x68D) {
+        || regval == 0x68C || regval == 0x68D || regval == 0x68E || regval == 0x69C || regval == 0x69D) {
         device_type = OP2;
     }
 
@@ -561,8 +605,11 @@ static int __init kbp_drv_module_init(void)
     if (pcie_bus_mapping) {
         KBP_INFO(": Parsing user provided PCIE bus mapping\n");
         status = parse_pcie_mapping(pcie_bus_mapping);
-        if (status < 0)
+        if (status < 0) {
+            /* At this moment kbp proc entry is created, remove it on error */
+            remove_proc_entry("kbp", NULL);
             return status;
+        }
     }
     KBP_INFO(": driver load process started.\n");
     status = pci_register_driver(&pci_driver_funcs);
@@ -571,6 +618,7 @@ static int __init kbp_drv_module_init(void)
         return -EINVAL;
     }
     KBP_INFO(": =========================================\n");
+
     return 0;
 }
 
@@ -613,12 +661,10 @@ static void kbp_free_device(struct kbp_device *device)
     device_free_list = device;
 }
 
-static void __exit kbp_drv_module_exit(void)
+static void remove_pci_devices(void)
 {
     struct kbp_device *tmp;
     struct kbp_enumeration_id *t;
-
-    pci_unregister_driver(&pci_driver_funcs);
 
     tmp = device_list_root;
     while (tmp) {
@@ -633,7 +679,6 @@ static void __exit kbp_drv_module_exit(void)
         kfree(tmp);
         tmp = next;
     }
-    remove_proc_entry("kbp", NULL);
 
     t = enumeration_ids;
     while (t) {
@@ -642,6 +687,13 @@ static void __exit kbp_drv_module_exit(void)
         kfree(t);
         t = next;
     }
+}
+
+static void __exit kbp_drv_module_exit(void)
+{
+    pci_unregister_driver(&pci_driver_funcs);
+    remove_pci_devices();
+    remove_proc_entry("kbp", NULL);
 
     KBP_INFO(": Unloaded.\n");
     KBP_INFO(": =========================================\n");

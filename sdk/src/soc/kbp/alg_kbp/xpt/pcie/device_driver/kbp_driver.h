@@ -1,6 +1,6 @@
 /*****************************************************************************************
 *
-* Copyright 2015-2020 Broadcom. All rights reserved.
+* Copyright 2015-2021 Broadcom. All rights reserved.
 * The term "Broadcom" refers to Broadcom Inc. and/or its subsidiaries.
 *
 * This program is free software; you can redistribute it and/or modify
@@ -63,10 +63,10 @@ struct kbp_sys_cfg
 #define KBP_FPGA_SIGNAL 12
 
 #define KBP_DRIVER_VERSION_MAJOR 2
-#define KBP_DRIVER_VERSION_MINOR 12
+#define KBP_DRIVER_VERSION_MINOR 14
 
 #define KBP_DRIVER_VERSION_MAJOR_STR "2"
-#define KBP_DRIVER_VERSION_MINOR_STR "12"
+#define KBP_DRIVER_VERSION_MINOR_STR "14"
 /**
  * m = memory, c = core, r = register, f = field, d = data.
  */
